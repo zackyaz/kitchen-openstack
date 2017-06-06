@@ -417,6 +417,40 @@ module Kitchen
           info "Sleeping for #{config[:server_wait]} seconds to let your server start up..." # rubocop:disable Metrics/LineLength
           countdown(config[:server_wait])
         end
+        if windows_os? &&
+    
+          instance.transport[:username] =~ /administrator/i
+          info "DDDDDDDDD #{instance.transport.connection(state)}"
+          info "qqqqqqqqqqqqqq #{state[:password]}"
+          info "qqqqqqqqqqqqqq #{instance.transport[:password]}"
+          get_pw_command = "nova "
+          get_pw_command += "--os-project-name #{instance.driver[:openstack_project_name]} "
+          get_pw_command += "--os-auth-url #{::File.dirname(::File.dirname(instance.driver[:openstack_auth_url]))} "
+          get_pw_command += "--os-project-domain-name #{instance.driver[:openstack_domain_name]} "
+          get_pw_command += "--os-user-domain-name #{instance.driver[:openstack_domain_name]} "
+          get_pw_command += "--os-user-name #{instance.driver[:openstack_username]} "
+          get_pw_command += "--os-password #{instance.driver[:openstack_api_key]} "
+          get_pw_command += "get-password #{state[:server_id]} #{instance.driver[:private_key_path]}"
+          info("Retrieving Windows password for instance <#{state[:server_id]}>.") 
+          #info get_pw_command
+          i = 0
+          while i < 30      
+          date1 = Time.now + (30 * 15)
+          date2 = Time.now - 100
+          while Time.now < date1  
+            result = Mixlib::ShellOut.new(get_pw_command)
+            result.run_command
+            if result.stdout.length > 1    
+             state[:password] = result.stdout.split[0]
+             info("Retrieved Windows password for instance <#{state[:server_id]}>.")
+             date1 = date2
+            else
+             #info 'Sleeping 15 seconds...'
+             Kernel.print '.'
+             sleep 15
+            end
+          end
+        end   
         info 'Waiting for server to be ready...'
         instance.transport.connection(state).wait_until_ready
       rescue
