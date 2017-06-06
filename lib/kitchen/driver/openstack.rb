@@ -418,11 +418,7 @@ module Kitchen
           countdown(config[:server_wait])
         end
         if windows_os? &&
-    
           instance.transport[:username] =~ /administrator/i
-          info "DDDDDDDDD #{instance.transport.connection(state)}"
-          info "qqqqqqqqqqqqqq #{state[:password]}"
-          info "qqqqqqqqqqqqqq #{instance.transport[:password]}"
           get_pw_command = "nova "
           get_pw_command += "--os-project-name #{instance.driver[:openstack_project_name]} "
           get_pw_command += "--os-auth-url #{::File.dirname(::File.dirname(instance.driver[:openstack_auth_url]))} "
